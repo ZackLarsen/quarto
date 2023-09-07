@@ -1,0 +1,168 @@
+---
+title: "Quarto Basics"
+toc: true
+toc-depth: 2
+toc-title: Contents
+toc-location: left
+toc-expand: 2
+format:
+  html:
+    code-fold: true
+    code-tools: true
+jupyter: python3
+execute: 
+  warning: false
+---
+
+## Imports
+
+```{python}
+import seaborn as sns
+import seaborn.objects as so
+from plotnine import *
+from plotnine.data import mtcars, diamonds
+
+tips = sns.load_dataset("tips")
+iris = sns.load_dataset("iris")
+penguins = sns.load_dataset("penguins")
+titanic = sns.load_dataset("titanic")
+
+```
+
+## Seaborn plots
+
+```{python}
+#| fig-cap: "Histogram"
+
+sns.histplot(data=tips, x="total_bill")
+```
+
+
+```{python}
+#| fig-cap: "Scatterplot"
+
+sns.scatterplot(data=tips, x="total_bill", y="tip")
+```
+
+
+```{python}
+sns.catplot(data=tips, kind="violin", x="day", y="total_bill", hue="smoker", split=True)
+```
+
+
+```{python}
+#| fig-cap: "Pair plot"
+
+sns.pairplot(data=iris)
+```
+
+
+```{python}
+
+g = sns.catplot(data=tips, x="day", y="total_bill", kind="violin", inner=None)
+sns.swarmplot(data=tips, x="day", y="total_bill", color="k", size=3, ax=g.ax)
+
+```
+
+
+## Seaborn objects
+
+```{python}
+
+(
+    so.Plot(diamonds, x="carat", y="price", color="carat")
+    .add(so.Dots())
+    .scale(
+        x=so.Continuous().tick(every=0.5),
+        y=so.Continuous().label(like="${x:.0f}"),
+        color=so.Continuous().tick(at=[1, 2, 3, 4]),
+    )
+)
+
+```
+
+
+```{python}
+(
+    so.Plot(
+        penguins,
+        x="bill_length_mm",
+        y="bill_depth_mm",
+        color="species",
+        pointsize="body_mass_g"
+    )
+    .add(so.Dot())
+)
+```
+
+
+```{python}
+
+(
+    so.Plot(penguins, x="flipper_length_mm")
+    .facet(col="species", row="sex")
+    .add(so.Bars(), so.Hist())
+)
+
+```
+
+
+```{python}
+
+(
+    so.Plot(titanic, x="age", alpha="alive")
+    .facet("sex")
+    .add(so.Bars(), so.Hist(binwidth=10), so.Stack())
+)
+
+```
+
+
+### Diamonds
+```{python}
+#| fig-cap: "Diamonds histogram"
+(
+  so.Plot(diamonds, "price")
+  .scale(x="log")
+  .add(so.Bars(), so.Hist(), so.Stack(), color="cut")
+)
+
+```
+
+
+## Plotnine plots
+
+```{python}
+
+(
+  ggplot(tips, aes(x='total_bill')) + 
+  geom_histogram(binwidth=2, color='black', fill='pink') + 
+  labs(title='Distribution of Total Bill', x='Total Bill', y='Count') + 
+  theme_xkcd()
+)
+
+```
+
+```{python}
+
+(
+  ggplot(mtcars, aes("wt", "mpg", color="factor(gear)")) + 
+  geom_point() + 
+  stat_smooth(method="lm") + 
+  facet_wrap("~gear") +
+  theme_seaborn()
+)
+
+```
+
+
+## Mermaid diagram
+
+```{mermaid}
+
+flowchart LR
+  A[Hard edge] --> B(Round edge)
+  B --> C{Decision}
+  C --> D[Result one]
+  C --> E[Result two]
+```

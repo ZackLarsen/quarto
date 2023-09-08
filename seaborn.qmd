@@ -1,5 +1,5 @@
 ---
-title: "Quarto Basics"
+title: "Seaborn"
 toc: true
 toc-depth: 2
 toc-title: Contents
@@ -19,8 +19,6 @@ execute:
 ```{python}
 import seaborn as sns
 import seaborn.objects as so
-from plotnine import *
-from plotnine.data import mtcars, diamonds
 
 tips = sns.load_dataset("tips")
 iris = sns.load_dataset("iris")
@@ -127,42 +125,4 @@ sns.swarmplot(data=tips, x="day", y="total_bill", color="k", size=3, ax=g.ax)
   .add(so.Bars(), so.Hist(), so.Stack(), color="cut")
 )
 
-```
-
-
-## Plotnine plots
-
-```{python}
-
-(
-  ggplot(tips, aes(x='total_bill')) + 
-  geom_histogram(binwidth=2, color='black', fill='pink') + 
-  labs(title='Distribution of Total Bill', x='Total Bill', y='Count') + 
-  theme_xkcd()
-)
-
-```
-
-```{python}
-
-(
-  ggplot(mtcars, aes("wt", "mpg", color="factor(gear)")) + 
-  geom_point() + 
-  stat_smooth(method="lm") + 
-  facet_wrap("~gear") +
-  theme_seaborn()
-)
-
-```
-
-
-## Mermaid diagram
-
-```{mermaid}
-
-flowchart LR
-  A[Hard edge] --> B(Round edge)
-  B --> C{Decision}
-  C --> D[Result one]
-  C --> E[Result two]
 ```

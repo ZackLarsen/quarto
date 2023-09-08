@@ -1,0 +1,263 @@
+---
+title: "Altair"
+toc: true
+toc-depth: 2
+toc-title: Contents
+toc-location: left
+toc-expand: 2
+format:
+  html:
+    code-fold: true
+    code-tools: true
+jupyter: python3
+execute: 
+  warning: false
+---
+
+## Imports
+
+```{python}
+import polars as pl
+import pandas as pd
+import altair as alt
+from vega_datasets import data as vega_data
+
+```
+
+
+## Altair concepts
+
+```{python}
+df = pd.DataFrame({
+    'city': ['Seattle', 'Seattle', 'Seattle', 'New York', 'New York', 'New York', 'Chicago', 'Chicago', 'Chicago'],
+    'month': ['Apr', 'Aug', 'Dec', 'Apr', 'Aug', 'Dec', 'Apr', 'Aug', 'Dec'],
+    'precip': [2.68, 0.87, 5.31, 3.94, 4.13, 3.58, 3.62, 3.98, 2.56]
+})
+
+df
+
+```
+
+The fundamental object in Altair is the Chart, which takes a data frame as a single argument.
+
+```{python}
+
+chart = alt.Chart(df)
+
+```
+
+With a chart object in hand, we can now specify how we would like the data to be visualized. We first indicate what kind of graphical mark (geometric shape) we want to use to represent the data. We can set the mark attribute of the chart object using the the Chart.mark_* methods.
+
+```{python}
+
+alt.Chart(df).mark_point()
+
+```
+
+Here the rendering consists of one point per row in the dataset, all plotted on top of each other, since we have not yet specified positions for these points.
+
+To visually separate the points, we can map various encoding channels, or channels for short, to fields in the dataset. For example, we could encode the field city of the data using the y channel, which represents the y-axis position of the points. To specify this, use the encode method.
+```{python}
+
+alt.Chart(df).mark_point().encode(
+  y='city',
+)
+
+```
+
+The encode() method builds a key-value mapping between encoding channels (such as x, y, color, shape, size, etc.) to fields in the dataset, accessed by field name. For Pandas data frames, Altair automatically determines an appropriate data type for the mapped column, which in this case is the nominal type, indicating unordered, categorical values.
+
+Though we’ve now separated the data by one attribute, we still have multiple points overlapping within each category. Let’s further separate these by adding an x encoding channel, mapped to the 'precip' field:
+
+```{python}
+
+alt.Chart(df).mark_point().encode(
+    x='precip',
+    y='city'
+)
+
+```
+
+Above we have specified key-value pairs using keyword arguments (x='precip'). In addition, Altair provides construction methods for encoding definitions, using the syntax alt.X('precip'). This alternative is useful for providing more parameters to an encoding, as we will see later in this notebook.
+
+
+```{python}
+
+alt.Chart(df).mark_point().encode(
+    alt.X('precip'),
+    alt.Y('city')
+)
+
+```
+
+Let’s say we want to represent our aggregated values using rectangular bars rather than circular points. We can do this by replacing Chart.mark_point with Chart.mark_bar:
+
+```{python}
+
+alt.Chart(df).mark_bar().encode(
+    x='average(precip)',
+    y='city'
+)
+
+```
+
+
+By default Altair / Vega-Lite make some choices about properties of the visualization, but these can be changed using methods to customize the look of the visualization. For example, we can specify the axis titles using the axis attribute of channel classes, we can modify scale properties using the scale attribute, and we can specify the color of the marking by setting the color keyword of the Chart.mark_* methods to any valid CSS color string.
+
+```{python}
+
+alt.Chart(df).mark_point(color='firebrick').encode(
+  alt.X('precip', scale=alt.Scale(type='log'), axis=alt.Axis(title='Log-Scaled Values')),
+  alt.Y('city', axis=alt.Axis(title='Category')),
+)
+
+```
+
+As we’ve seen above, the Altair Chart object represents a plot with a single mark type. What about more complicated diagrams, involving multiple charts or layers? Using a set of view composition operators, Altair can take multiple chart definitions and combine them to create more complex views.
+
+We can start by defining each chart separately: first a line plot, then a scatter plot. We can then use the layer operator to combine the two into a layered chart. Here we use the shorthand + (plus) operator to invoke layering:
+
+```{python}
+cars = vega_data.cars()
+
+line = alt.Chart(cars).mark_line().encode(
+    alt.X('Year'),
+    alt.Y('average(Miles_per_Gallon)')
+)
+
+point = alt.Chart(cars).mark_circle().encode(
+    alt.X('Year'),
+    alt.Y('average(Miles_per_Gallon)')
+)
+
+line + point
+
+```
+
+We can also create this chart by reusing and modifying a previous chart definition! Rather than completely re-write a chart, we can start with the line chart, then invoke the mark_point method to generate a new chart definition with a different mark type.
+
+```{python}
+
+mpg = alt.Chart(cars).mark_line().encode(
+    alt.X('Year'),
+    alt.Y('average(Miles_per_Gallon)')
+)
+
+mpg + mpg.mark_circle()
+
+```
+
+We can use concatenation operators to place multiple charts side-by-side, either vertically or horizontally. Here, we’ll use the | (pipe) operator to perform horizontal concatenation of two charts.
+
+```{python}
+
+hp = alt.Chart(cars).mark_line().encode(
+    alt.X('Year'),
+    alt.Y('average(Horsepower)')
+)
+
+(mpg + mpg.mark_circle()) | (hp + hp.mark_circle())
+
+```
+
+Vertically concatenate (vconcat) charts using the '&' operator.
+
+```{python}
+
+(mpg + mpg.mark_circle()) & (hp + hp.mark_circle())
+
+```
+
+
+## Altair plots
+
+```{python}
+#| fig-cap: "Histogram"
+
+data = vega_data.gapminder()
+
+data2000 = pl.DataFrame(data).filter(pl.col("year") == 2000).to_pandas()
+
+```
+
+```{python}
+
+alt.Chart(data2000).mark_point().encode(
+    alt.X('fertility:Q')
+)
+
+```
+
+```{python}
+
+alt.Chart(data2000).mark_point(filled=True).encode(
+    alt.X('fertility:Q', scale=alt.Scale(zero=False)),
+    alt.Y('life_expect:Q', scale=alt.Scale(zero=False)),
+    alt.Size('pop:Q', scale=alt.Scale(range=[0,1000])),
+    alt.Color('cluster:N'),
+    alt.OpacityValue(0.5),
+    alt.Shape('cluster:N'),
+    tooltip = [
+        alt.Tooltip('country:N'),
+        alt.Tooltip('fertility:Q'),
+        alt.Tooltip('life_expect:Q')
+    ]
+)
+
+```
+
+```{python}
+
+select_year = alt.selection_single(
+    name='select', fields=['year'],
+    bind=alt.binding_range(min=1955, max=2005, step=5)
+)
+
+alt.Chart(data).mark_point(filled=True).encode(
+    alt.X('fertility:Q', scale=alt.Scale(domain=[0,9])),
+    alt.Y('life_expect:Q', scale=alt.Scale(domain=[0,90])),
+    alt.Size('pop:Q', scale=alt.Scale(domain=[0, 1200000000], range=[0,1000])),
+    alt.Color('cluster:N', legend=None),
+    alt.OpacityValue(0.5),
+    alt.Tooltip('country:N'),
+    alt.Order('pop:Q', sort='descending')
+).add_selection(select_year).transform_filter(select_year)
+
+```
+
+```{python}
+
+alt.Chart(data2000).mark_bar().encode(
+    alt.X('country:N', sort=alt.EncodingSortField(
+      field='pop', order='descending')
+    ),
+    alt.Y('pop:Q')
+)
+
+```
+
+```{python}
+
+source = vega_data.cars()
+
+brush = alt.selection(type='interval')
+
+points = alt.Chart(source).mark_point().encode(
+    x='Horsepower:Q',
+    y='Miles_per_Gallon:Q',
+    color=alt.condition(brush, 'Origin:N', alt.value('gray'))
+).add_selection(
+    brush
+)
+
+bars = alt.Chart(source).mark_bar().encode(
+    y='Origin:N',
+    color='Origin:N',
+    x='count(Origin):Q'
+).transform_filter(
+    brush
+)
+
+alt.vconcat(points, bars, data=source)
+
+```

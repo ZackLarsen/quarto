@@ -1,0 +1,38 @@
+---
+title: "ggplot2"
+toc: true
+toc-depth: 2
+toc-title: Contents
+toc-location: left
+toc-expand: 2
+format:
+  html:
+    code-fold: true
+    code-tools: true
+execute: 
+  warning: false
+---
+
+```{r}
+#library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+```
+
+```{r}
+
+ggplot(diamonds, aes(clarity, depth)) +
+  geom_boxplot(fill = "pink") +
+  coord_flip() + 
+  theme_economist()
+
+```
+
+```{r}
+
+ggplot(diamonds, aes(clarity, depth)) +
+  geom_boxplot(fill = "pink") +
+  coord_flip() + 
+  theme_wsj()
+
+```

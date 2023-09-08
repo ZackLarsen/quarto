@@ -16,3 +16,5 @@ dependencies:
     - matplotlib
     - seaborn
     - plotnine
+    - altair
+    - vega_datasets

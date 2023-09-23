@@ -1,0 +1,78 @@
+---
+title: "Altair"
+format:
+  html:
+    code-fold: true
+    code-tools: false
+jupyter: python3
+execute: 
+  warning: false
+  cache: true
+---
+
+## Imports
+
+```{python}
+
+import polars as pl
+import pandas as pd
+import altair as alt
+from vega_datasets import data as vega_data
+
+```
+
+
+## Gapminder population by year
+
+```{python}
+
+data = vega_data.gapminder()
+
+data2000 = pl.DataFrame(data).filter(pl.col("year") == 2000).to_pandas()
+
+select_year = alt.selection_single(
+    name='select',
+    fields=['year'],
+    bind=alt.binding_range(min=1955, max=2005, step=5)
+)
+
+alt.Chart(data).mark_point(filled=True).encode(
+    alt.X('fertility:Q', title='Fertility', scale=alt.Scale(domain=[0,9])),
+    alt.Y('life_expect:Q', title='Life Expectancy', scale=alt.Scale(domain=[0,90])),
+    alt.Size('pop:Q', title='Population', scale=alt.Scale(domain=[0, 1200000000], range=[0,1000])),
+    alt.Color('cluster:N'),
+    alt.OpacityValue(0.5),
+    alt.Tooltip('country:N'),
+    alt.Order('pop:Q', sort='descending')
+).add_selection(select_year).transform_filter(select_year)
+
+```
+
+
+## Brushing
+
+```{python}
+
+source = vega_data.cars()
+
+brush = alt.selection(type='interval')
+
+points = alt.Chart(source).mark_point().encode(
+    x='Horsepower:Q',
+    y='Miles_per_Gallon:Q',
+    color=alt.condition(brush, 'Origin:N', alt.value('gray'))
+).add_selection(
+    brush
+)
+
+bars = alt.Chart(source).mark_bar().encode(
+    y='Origin:N',
+    color='Origin:N',
+    x='count(Origin):Q'
+).transform_filter(
+    brush
+)
+
+alt.vconcat(points, bars, data=source)
+
+```

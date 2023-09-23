@@ -1,0 +1,79 @@
+---
+title: "D3blocks"
+toc: true
+toc-depth: 2
+toc-title: Contents
+toc-location: left
+toc-expand: 2
+format:
+  html:
+    code-fold: true
+    code-tools: true
+jupyter: python3
+execute: 
+  warning: false
+  cache: true
+---
+
+## Imports
+
+```{python}
+
+import polars as pl
+from d3blocks import D3Blocks
+
+```
+
+
+```{python}
+
+tuition_cost = pl.read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_cost.csv')
+
+tuition_cost.head()
+
+tuition_cost_by_state = tuition_cost.group_by('state').agg(pl.col("in_state_tuition").sum())
+
+tuition_cost_by_state
+
+```
+
+
+```{python}
+
+d3 = D3Blocks()
+
+d3.treemap(tuition_cost_by_state.to_pandas().rename(columns={'in_state_tuition': 'weight'}))
+
+```
+
+```
+
+
+```{python}
+
+
+```
+
+
+```{python}
+
+
+```
+
+
+```{python}
+
+
+```
+
+
+```{python}
+
+
+```
+
+
+```{python}
+
+
+```

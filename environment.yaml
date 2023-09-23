@@ -12,9 +12,12 @@ dependencies:
     - ipykernel
     - jupyter
     - quarto
+    - jupyter-cache
     - graphviz
     - matplotlib
     - seaborn
     - plotnine
     - altair
     - vega_datasets
+    - d3blocks
+    - plotly

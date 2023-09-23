@@ -5,14 +5,14 @@ toc-depth: 2
 toc-title: Contents
 toc-location: left
 toc-expand: 2
-format: gfm
-# format:
-#   html:
-#     code-fold: true
-#     code-tools: true
+format:
+  html:
+    code-fold: true
+    code-tools: true
 jupyter: python3
 execute: 
   warning: false
+  cache: true
 ---
 
 ## Imports
@@ -260,5 +260,92 @@ bars = alt.Chart(source).mark_bar().encode(
 )
 
 alt.vconcat(points, bars, data=source)
+
+```
+
+
+[Tuition cost](https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-03-10)
+
+```{python}
+
+tuition_cost = pl.read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/tuition_cost.csv')
+
+tuition_cost.head()
+
+```
+
+
+```{python}
+
+tuition_cost_by_state = tuition_cost.group_by('state').agg(pl.col("in_state_tuition").sum())
+
+tuition_cost_by_state
+```
+
+
+```{python}
+
+alt.themes.enable('fivethirtyeight')
+
+alt.Chart(tuition_cost_by_state, title="Tuition cost by state").mark_bar().encode(
+    alt.X('state:N', sort=alt.EncodingSortField(
+      field='in_state_tuition', order='descending')
+    ),
+    alt.Y('in_state_tuition:Q')
+)
+
+```
+
+
+```{python}
+
+alt.themes.enable('ggplot2')
+
+alt.Chart(tuition_cost_by_state, title="Tuition cost by state").mark_bar().encode(
+    alt.X('state:N', sort=alt.EncodingSortField(
+      field='in_state_tuition', order='descending')
+    ),
+    alt.Y('in_state_tuition:Q')
+)
+
+```
+
+
+```{python}
+
+alt.themes.enable('dark')
+
+alt.Chart(tuition_cost_by_state, title="Tuition cost by state").mark_bar().encode(
+    alt.X('state:N',
+    axis=alt.Axis(title="State"),
+    sort=alt.EncodingSortField(
+        field='in_state_tuition',
+        order='descending')
+    ),
+    alt.Y('in_state_tuition:Q', axis=alt.Axis(title="In-state Tuition"))
+)
+
+```
+
+```{python}
+
+base = alt.Chart(tuition_cost_by_state)
+
+bar = base.mark_bar().encode(
+    alt.X('state:N',
+    axis=alt.Axis(title="State"),
+    sort=alt.EncodingSortField(
+        field='in_state_tuition',
+        order='descending')
+    ),
+    alt.Y('in_state_tuition:Q', axis=alt.Axis(title="In-state Tuition"))
+)
+
+rule = base.mark_rule(color='red').encode(
+    y='mean(in_state_tuition):Q',
+    size=alt.value(5)
+)
+
+bar + rule
 
 ```

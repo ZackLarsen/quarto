@@ -1,0 +1,48 @@
+---
+title: "Plotly"
+toc: true
+toc-depth: 2
+toc-title: Contents
+toc-location: left
+toc-expand: 2
+format:
+  html:
+    code-fold: true
+    code-tools: true
+jupyter: python3
+execute: 
+  warning: false
+  cache: true
+---
+
+## Imports
+
+```{python}
+import polars as pl
+import pandas as pd
+import numpy as np
+import plotly.express as px
+
+```
+
+```{python}
+
+df = px.data.tips()
+fig = px.treemap(df, path=[px.Constant("all"), 'day', 'time', 'sex'], values='total_bill')
+fig.update_traces(root_color="lightgrey")
+fig.update_layout(margin = dict(t=50, l=25, r=25, b=25))
+fig.show()
+
+```
+
+```{python}
+
+df = px.data.gapminder().query("year == 2007")
+fig = px.treemap(df, path=[px.Constant("world"), 'continent', 'country'], values='pop',
+                  color='lifeExp', hover_data=['iso_alpha'],
+                  color_continuous_scale='RdBu',
+                  color_continuous_midpoint=np.average(df['lifeExp'], weights=df['pop']))
+fig.update_layout(margin = dict(t=50, l=25, r=25, b=25))
+fig.show()
+
+```

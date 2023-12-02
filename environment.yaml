@@ -13,6 +13,7 @@ dependencies:
     - jupyter
     - quarto
     - jupyter-cache
+    - jupyter_contrib_nbextensions
     - graphviz
     - matplotlib
     - seaborn

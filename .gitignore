@@ -1,3 +1,8 @@
+.jupyter_cache/
+*_files/
+*.DS_Store*
+quarto.wiki/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,5 +1,7 @@
 # quarto
 
+[GitHub Pages Site](https://zacklarsen.github.io/quarto/)
+
 ## Setup
 
 First, create a virtual environment and install the dependencies and then activate the environment:
